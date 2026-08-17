@@ -45,14 +45,57 @@ Each candidate is one `<article>`:
 
 - **Title** — short, names the deepening (e.g. "Collapse the Order intake pipeline").
 - **Badge row** — recommendation strength (`Strong` = emerald, `Worth exploring` = amber, `Speculative` = slate), plus a tag for the dependency category (`in-process`, `local-substitutable`, `ports & adapters`, `mock`).
-- **Files** — monospaced list, `font-mono text-sm`.
+- **Files** — monospaced list, `font-mono text-sm`, with line numbers where possible.
 - **Before / After diagram** — the centrepiece. Two columns, side by side. See patterns below.
-- **Problem** — one sentence. What hurts.
-- **Solution** — one sentence. What changes.
+- **Evidence** — 2-4 bullets naming the concrete caller/test evidence and exact file/line citations. Include counts when available.
+- **Intent check** — a short source-to-implication note saying whether specs, ADRs, comments, or decision logs make the current shape intentional, and how that affects the candidate. If none were found, say "No intent source found" and cite where you looked.
+- **Problem** or **Question to validate** — **Problem** only when evidence proves real friction. **Question to validate** when the observation is plausible but still missing caller evidence, intent clarity, or deletion-test certainty.
+- **Solution** — one sentence. What changes, including the rough interface shape (name plus 1-3 entry points).
 - **Wins** — bullets, ≤6 words each. e.g. "Tests hit one interface", "Pricing logic stops leaking", "Delete 4 shallow wrappers".
+- **Confidence** — `High`, `Medium`, or `Low`, plus one short reason. `Strong` candidates should almost always be `High`; `Speculative` candidates should almost always be `Low`.
 - **ADR callout** (if applicable) — one line in an amber-tinted box.
 
-No paragraphs of explanation. If the diagram needs a paragraph to be understood, redraw the diagram.
+No paragraphs of explanation. If the diagram needs a paragraph to be understood, redraw the diagram. If the evidence needs more room, the candidate is not ready for this report; narrow it until the proof is crisp.
+
+## Reader clarity gates
+
+Each card must make sense to a reader who knows the project but has not just read the files you read.
+
+- The summary under the card title names the domain object or process and the user-visible work. Do not write only the architecture move. Prefer "Assemble signed evidence bundles through one interface" over "Make finalization a deeper interface".
+- If a local term names a stage, define it in the first sentence. Example: "Finalization is the post-signature stage that creates the evidence bundle."
+- The **Problem** starts with the claim. The next sentence gives the evidence as ordered operations or short bullets.
+- The **Intent check** connects facts. Do not write two adjacent source facts and make the reader infer the relationship. Use: "Because the spec requires X, this candidate must preserve Y; it can still change Z."
+- Long operation lists need hierarchy. Group by work type: document artifacts, manifest bytes, seal, returned bundle.
+- Avoid rhetorical concession patterns: "the seam is real, but...", "the interface exists, but...", "this is already good, but...".
+- Avoid vague movement verbs: "absorb", "swallow", "hide everything". Use concrete verbs: "move behind the interface", "own", "keep outside", "call", "return", "persist".
+
+Bad:
+
+> The finalization seam is real in the implementation, but the exported interface still requires bundle-producing callers to learn PDF assembly, stored-byte hashing, manifest construction, canonical bytes, digesting, sealing order, and Bundle field wiring.
+
+Good:
+
+> The exported interface still exposes too much of the bundle-finalization process. Callers have to assemble the PDF, hash the stored bytes, construct and canonicalize the manifest, compute its digest, seal the digest in the correct order, and populate the Bundle fields themselves.
+
+Intent Check bad:
+
+> PROTOCOL.md requires seal verification over stored bytes and additive-field tolerance. It does not permit skipping required known fields.
+
+Intent Check good:
+
+> Because PROTOCOL.md requires seal verification over stored bytes, the manifest module must keep the original bytes for the seal check and avoid parse-reserializing them. Additive-field tolerance only applies to unknown fields; the same parser can still reject known v1 signer fields when they are missing.
+
+## Evidence gates
+
+Every card must show:
+
+- **Caller evidence** — real call sites or tests that must learn implementation ordering, invariants, collaborators, or data shape.
+- **Intent source** — specs, ADRs, decision logs, comments, or "none found after checking X/Y/Z".
+- **Deletion-test result** — what complexity concentrates behind the deeper interface instead of moving elsewhere.
+- **Interface sketch** — the proposed module name and 1-3 entry points.
+- **Testing payoff** — the seam tests would use and any old test surface that can shrink.
+
+Do not let architecture vocabulary stand in for evidence. A sentence like "callers still assemble the PDF, hash the stored bytes, canonicalize the manifest, digest it, seal it, and populate the Bundle" is only acceptable if the card cites real callers that repeat that sequence and checks whether a spec intentionally assigned that orchestration to them. Without that proof, write it as a **Question to validate**.
 
 ## Diagram patterns
 
@@ -118,6 +161,8 @@ Plain English, concise — but the architectural nouns and verbs come straight f
 - "Deepen: one interface, one place to test."
 - "Two adapters justify the seam: HTTP in prod, in-memory in tests."
 
-**Wins bullets** name the gain in glossary terms: *"locality: bugs concentrate in one module"*, *"leverage: one interface, N call sites"*, *"interface shrinks; implementation absorbs the wrappers"*. Don't write *"easier to maintain"* or *"cleaner code"* — those terms aren't in the glossary and don't earn their place.
+**Evidence bullets** name facts, not interpretations: *"`finalizer.go:42-61` repeats the 5-step manifest sequence"*, *"`bundle_test.go:18-39` hand-assembles the same order"*, *"`ADR-0007` explicitly assigns storage outside the seam"*. Don't write *"callers learn everything"* unless you can point to the callers. Even then, translate "learn" into observable work: "callers construct", "callers pass", "callers order", "callers persist".
 
-No hedging, no throat-clearing, no "it's worth noting that…". If a sentence could be a bullet, make it a bullet. If a bullet could be cut, cut it. If a term isn't in the `/codebase-design` glossary, reach for one that is before inventing a new one.
+**Wins bullets** name the gain in glossary terms: *"locality: bugs concentrate in one module"*, *"leverage: one interface, N call sites"*, *"interface shrinks; wrappers move inside"*. Don't write *"easier to maintain"* or *"cleaner code"* — those terms aren't in the glossary and don't earn their place.
+
+No hedging, no throat-clearing, no "it's worth noting that…". No "X is real, but..." setup clauses. If a sentence could be a bullet, make it a bullet. If a bullet could be cut, cut it. If a term isn't in the `/codebase-design` glossary, reach for one that is before inventing a new one.

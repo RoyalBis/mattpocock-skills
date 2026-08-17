@@ -6,6 +6,10 @@ It never changes the code. The whole run produces one HTML file in your OS temp 
 
 Two filters keep the report from becoming generic cleanup advice. Every candidate has to pass the **deletion test** — would removing this module concentrate complexity behind a smaller interface, or just spread it across callers? Only the "concentrates" cases earn a card. And unless you point it at a specific area, it reads recent commit history first and biases the scan toward paths that are actively changing, on the grounds that a deepening in code nobody touches is a refactor you will never cash in.
 
+The report also has proof gates. A candidate needs real caller or test evidence, file/line citations, an intent check against nearby specs or ADRs, a rough interface sketch, and a clear testing payoff. If the signal is plausible but incomplete, the card must say **Question to validate**, not **Problem**.
+
+It also has a reader-clarity gate. Candidate cards should name the domain process, define local stage names the first time they matter, state the claim before the evidence, and break long technical lists into ordered work. Intent checks should connect source requirements to the candidate, not place two spec facts next to each other and hope the relationship is obvious. A card should not make you reverse-engineer what "finalization" or "deeper interface" refers to.
+
 ## When to reach for it
 
 You invoke this by typing `/improve-codebase-architecture` — the [agent](https://www.aihero.dev/ai-coding-dictionary/agent) will not reach for it on its own.
@@ -35,7 +39,7 @@ It writes in two places. The report goes to `<tmpdir>/architecture-review-<times
 
 The skill turns on one idea: **depth**. A deep module puts a lot of behaviour behind a small, stable interface. A shallow one leaks its implementation through an interface nearly as wide as the code beneath it. The report is a hunt for shallowness — pure functions extracted only for testability while the real bugs live in how they are called (no **locality**), modules leaking across their **seams**, a concept you cannot understand without opening five files — and a proposal for the deepening that fixes it.
 
-Each candidate is a card: the files involved, the friction, a plain-English solution, the benefit stated in terms of **locality** and **leverage**, a before/after diagram, and a strength badge.
+Each candidate is a card: the files involved, the evidence, the intent check, the friction or question to validate, a plain-English solution, the benefit stated in terms of **locality** and **leverage**, a before/after diagram, a strength badge, and a confidence label. The title and summary should stand on their own: "assemble signed evidence bundles through one interface," not "make finalization deeper."
 
 | Badge | What it means for you |
 | --- | --- |
@@ -43,7 +47,7 @@ Each candidate is a card: the files involved, the friction, a plain-English solu
 | `Worth exploring` | Plausible deepening, but the payoff depends on where the code is going next. |
 | `Speculative` | Surfaced for completeness. Most of these are safe to ignore. |
 
-The report ends with a **Top recommendation** — the one it would tackle first — and then the skill stops and asks which candidate you want to explore. Nothing has been decided at that point, and no code has moved.
+The report ends with a **Top recommendation** — the one it would tackle first — and then the skill stops and asks which candidate you want to explore. Nothing has been decided at that point, and no code has moved. Intentional low-level interfaces are allowed to stay intentional: when a spec assigns orchestration to callers, the report must respect that decision unless it can show new caller friction worth reopening.
 
 ## What happens after you pick one
 
@@ -93,7 +97,10 @@ There is no good answer shipped with the skill. The recurring request is for a `
 - The candidates cluster in files you have edited recently, not in dormant corners of the repo.
 - No code changed during the run. The only new file is the HTML report in your temp directory.
 - It stops after the report and asks which candidate you want, rather than continuing on its own.
-- Each card explains the payoff as locality or leverage, and says which tests get simpler — not just "this is cleaner."
+- Each card cites real caller/test evidence, checks spec or ADR intent, and explains the payoff as locality or leverage — not just "this is cleaner."
+- Intent checks explain the implication: "because the spec requires X, the candidate must preserve Y and may change Z."
+- Dense claims are split: one sentence for the criticism, then ordered operations or bullets for the evidence.
+- Weak findings are framed as **Question to validate**, not confident **Problem** statements.
 - Rejecting a candidate for a durable reason gets you an offer to record an ADR, so the next run does not re-suggest it.
 
 ## Where it fits
