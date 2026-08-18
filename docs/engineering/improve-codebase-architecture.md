@@ -1,14 +1,14 @@
 ## What it does
 
-`improve-codebase-architecture` surveys a codebase for **deepening opportunities** — places where a shallow module (an interface nearly as complex as the thing it hides) could become a deep one — writes them up as a self-contained HTML report, and then [grills](https://www.aihero.dev/ai-coding-dictionary/grilling) you through whichever one you pick.
+`improve-codebase-architecture` surveys a codebase for places where callers carry too much implementation complexity, proposes a smaller interface with clearer ownership, writes the candidates as a self-contained HTML report, and then [grills](https://www.aihero.dev/ai-coding-dictionary/grilling) you through whichever one you pick.
 
 It never changes the code. The whole run produces one HTML file in your OS temp directory and a conversation; the refactor itself happens later, in a separate [session](https://www.aihero.dev/ai-coding-dictionary/session), through the normal build flow. That is what makes it a survey rather than a refactoring tool, and it is why the skill is worth running on a codebase you are not ready to touch yet.
 
 Two filters keep the report from becoming generic cleanup advice. Every candidate has to pass the **deletion test** — would removing this module concentrate complexity behind a smaller interface, or just spread it across callers? Only the "concentrates" cases earn a card. And unless you point it at a specific area, it reads recent commit history first and biases the scan toward paths that are actively changing, on the grounds that a deepening in code nobody touches is a refactor you will never cash in.
 
-The report also has proof gates. A candidate needs real caller or test evidence, file/line citations, an intent check against nearby specs or ADRs, a rough interface sketch, and a clear testing payoff. If the signal is plausible but incomplete, the card must say **Question to validate**, not **Problem**.
+The report also has proof gates. A candidate needs real caller or test evidence, file/line citations, an intent check against nearby specs or ADRs, a concrete target design, an implementation path, and a clear testing payoff. Substantial proposals also state their expected result, compare realistic alternatives, and identify any failure or retry decision that affects the interface. If the signal is plausible but incomplete, the card must say **Question to validate**, not **Problem**.
 
-It also has a reader-clarity gate. Candidate cards should name the domain process, define local stage names the first time they matter, state the claim before the evidence, and break long technical lists into ordered work. Intent checks should connect source requirements to the candidate, not place two spec facts next to each other and hope the relationship is obvious. A card should not make you reverse-engineer what "finalization" or "deeper interface" refers to.
+It also has a reader-clarity gate. Candidate cards lead with the proposed change, explain the architectural problem before listing implementation details, and make ownership explicit. Repository references support the argument without turning it into a proof brief. Benefits are written as concrete consequences for callers and tests rather than labels such as "locality" or "leverage."
 
 ## When to reach for it
 
@@ -31,7 +31,7 @@ Where it is confusable with siblings:
 
 ## Prerequisites
 
-None to run it. It reads `CONTEXT.md` and any ADRs in `docs/adr/` if they exist, and speaks in your domain's own nouns when they do — a candidate reads as "deepen the Order intake module," not "refactor the FooBarHandler."
+None to run it. It reads `CONTEXT.md` and any ADRs in `docs/adr/` if they exist, and speaks in your domain's own nouns when they do — a candidate reads as "assemble Orders through one interface," not "deepen the FooBarHandler."
 
 It writes in two places. The report goes to `<tmpdir>/architecture-review-<timestamp>.html`, outside the repo. During the grilling loop it will add or sharpen terms in `CONTEXT.md`, creating that file if it does not exist, and offer to record a rejected candidate as an ADR so a future run does not re-suggest it.
 
@@ -39,7 +39,7 @@ It writes in two places. The report goes to `<tmpdir>/architecture-review-<times
 
 The skill turns on one idea: **depth**. A deep module puts a lot of behaviour behind a small, stable interface. A shallow one leaks its implementation through an interface nearly as wide as the code beneath it. The report is a hunt for shallowness — pure functions extracted only for testability while the real bugs live in how they are called (no **locality**), modules leaking across their **seams**, a concept you cannot understand without opening five files — and a proposal for the deepening that fixes it.
 
-Each candidate is a card: the files involved, the evidence, the intent check, the friction or question to validate, a plain-English solution, the benefit stated in terms of **locality** and **leverage**, a before/after diagram, a strength badge, and a confidence label. The title and summary should stand on their own: "assemble signed evidence bundles through one interface," not "make finalization deeper."
+Each candidate is a card that starts with the proposed change. It explains the current problem, shows a concrete target interface and ownership split, gives an implementation path, states what callers and tests can verify afterward, and compares alternatives when a real choice exists. Evidence, intent constraints, a before/after diagram, a strength badge, and a confidence label support that recommendation rather than dictate its prose.
 
 | Badge | What it means for you |
 | --- | --- |
@@ -47,7 +47,7 @@ Each candidate is a card: the files involved, the evidence, the intent check, th
 | `Worth exploring` | Plausible deepening, but the payoff depends on where the code is going next. |
 | `Speculative` | Surfaced for completeness. Most of these are safe to ignore. |
 
-The report ends with a **Top recommendation** — the one it would tackle first — and then the skill stops and asks which candidate you want to explore. Nothing has been decided at that point, and no code has moved. Intentional low-level interfaces are allowed to stay intentional: when a spec assigns orchestration to callers, the report must respect that decision unless it can show new caller friction worth reopening.
+The report ends with a **Top recommendation** that states the implementation decision, expected result, and any open decision that must be resolved before coding. The skill then stops and asks which candidate you want to explore. Intentional low-level interfaces are allowed to stay intentional: when a spec assigns orchestration to callers, the report must respect that decision unless it can show new caller friction worth reopening.
 
 ## What happens after you pick one
 
