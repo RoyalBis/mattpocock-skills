@@ -9,7 +9,8 @@
   },
   "license": "MIT",
   "scripts": {
-    "validate-skills": "node scripts/validate-skills.mjs",
+    "validate-skills": "node scripts/validate-skills.mjs && npm test",
+    "test": "python3 -B -m unittest discover -s skills/engineering/validate-mermaid/tests -v && python3 -B -m unittest discover -s skills/engineering/improve-codebase-architecture/tests -v",
     "changeset": "changeset",
     "version": "changeset version && node scripts/sync-plugin-version.mjs",
     "check-plugin-version": "node scripts/sync-plugin-version.mjs --check"

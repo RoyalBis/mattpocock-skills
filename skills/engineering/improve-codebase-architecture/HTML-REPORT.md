@@ -1,6 +1,8 @@
 # HTML Report Format
 
-The architectural review is rendered as a single self-contained HTML file in the OS temp directory. Tailwind and Mermaid both come from CDNs. Mermaid handles graph-shaped diagrams reliably; hand-built divs and inline SVG handle the more editorial visuals (mass diagrams, cross-sections). Mix the two — don't lean on Mermaid for everything, it'll start to look generic.
+The architectural review is rendered as a single self-contained HTML file in the OS temp directory and served through the skill's single-file report server. Before serving, call the Skill tool with "validate-mermaid" for the report path and Mermaid 11.16.1, then fix every parse error. The local compatibility command is `python3 scripts/validate-report.py <report-path>`. Return the printed localhost URL as the primary way to view the validated report; the temp-file path is only a fallback. A successful `xdg-open`, `open`, or `start` command does not prove that a remote user has a connected browser.
+
+Tailwind and Mermaid both come from CDNs. Pin Mermaid to version 11.16.1, matching the bundled validator; a floating major version can accept a report during one run and reject it later. Mermaid handles graph-shaped diagrams reliably; hand-built divs and inline SVG handle the more editorial visuals (mass diagrams, cross-sections). Mix the two — don't lean on Mermaid for everything, it'll start to look generic.
 
 ## Scaffold
 
@@ -12,7 +14,7 @@ The architectural review is rendered as a single self-contained HTML file in the
     <title>Architecture review — {{repo name}}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="module">
-      import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+      import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.16.1/dist/mermaid.esm.min.mjs";
       mermaid.initialize({ startOnLoad: true, theme: "neutral", securityLevel: "loose" });
     </script>
     <style>

@@ -1,6 +1,6 @@
 ## What it does
 
-`improve-codebase-architecture` surveys a codebase for places where callers carry too much implementation complexity, proposes a smaller interface with clearer ownership, writes the candidates as a self-contained HTML report, and then [grills](https://www.aihero.dev/ai-coding-dictionary/grilling) you through whichever one you pick.
+`improve-codebase-architecture` surveys a codebase for places where callers carry too much implementation complexity, proposes a smaller interface with clearer ownership, writes the candidates as a self-contained HTML report, serves it at a temporary localhost URL, and then [grills](https://www.aihero.dev/ai-coding-dictionary/grilling) you through whichever one you pick.
 
 It never changes the code. The whole run produces one HTML file in your OS temp directory and a conversation; the refactor itself happens later, in a separate [session](https://www.aihero.dev/ai-coding-dictionary/session), through the normal build flow. That is what makes it a survey rather than a refactoring tool, and it is why the skill is worth running on a codebase you are not ready to touch yet.
 
@@ -31,9 +31,9 @@ Where it is confusable with siblings:
 
 ## Prerequisites
 
-None to run it. It reads `CONTEXT.md` and any ADRs in `docs/adr/` if they exist, and speaks in your domain's own nouns when they do — a candidate reads as "assemble Orders through one interface," not "deepen the FooBarHandler."
+Install [validate-mermaid](https://aihero.dev/skills-validate-mermaid) alongside this skill; the full plugin includes both, while a single-skill installation must include it explicitly. The validator requires Node.js and npm. The architecture review also reads `CONTEXT.md` and any ADRs in `docs/adr/` if they exist, and speaks in your domain's own nouns when they do — a candidate reads as "assemble Orders through one interface," not "deepen the FooBarHandler."
 
-It writes in two places. The report goes to `<tmpdir>/architecture-review-<timestamp>.html`, outside the repo. During the grilling loop it will add or sharpen terms in `CONTEXT.md`, creating that file if it does not exist, and offer to record a rejected candidate as an ADR so a future run does not re-suggest it.
+It writes in two places. The report goes to `<tmpdir>/architecture-review-<timestamp>.html`, outside the repo, and a temporary single-file server makes it available at the localhost URL returned by the run. During the grilling loop it will add or sharpen terms in `CONTEXT.md`, creating that file if it does not exist, and offer to record a rejected candidate as an ADR so a future run does not re-suggest it.
 
 ## Depth, and the report that hunts for it
 
@@ -62,6 +62,14 @@ Yes — say so when you invoke it ("don't grill me, just show the report"). This
 **The report opened as unstyled raw HTML with no diagrams. What happened?**
 
 The report loads Tailwind and Mermaid from CDNs, so it needs network access when you open it, and it breaks silently when something blocks those scripts. The filed case was a security hook demanding SRI hashes: the agent added them, the CDN served different bytes to the browser than to the `curl` used to compute the hash, and the browser blocked the script. Offline and locked-down environments hit the same wall. The agent cannot see this, because it never renders the page. The workaround is to ask for inline CSS and hand-built SVG diagrams instead of the CDN scaffold. This is an open issue and a real rough edge.
+
+**A diagram says `Syntax error in text`. Should the skill have caught that?**
+
+Yes. Before serving a report, the skill calls [validate-mermaid](https://aihero.dev/skills-validate-mermaid), which runs every Mermaid block through Mermaid 11.16.1's parser and stops on any error. The browser import is pinned to that same version so validation and rendering use the same grammar. The validator checks syntax without launching Chrome; CDN failures and browser-only layout problems are separate rendering failures.
+
+**It printed a `/tmp` path but no report window appeared. How do I view it?**
+
+The run should also print a tokenized `http://localhost:<port>/<token>/` URL and keep a temporary report server running. Open that URL in your browser. A temp-file path and a successful `xdg-open` command are not enough in a remote or headless harness; if no URL was returned, the report delivery step did not complete.
 
 **It gave me twelve candidates. Do I work through them in the same session or start a new one?**
 
@@ -95,7 +103,8 @@ There is no good answer shipped with the skill. The recurring request is for a `
 
 - The candidates name your domain's concepts, not invented class names — "the Order intake module," not "the FooBarHandler."
 - The candidates cluster in files you have edited recently, not in dormant corners of the repo.
-- No code changed during the run. The only new file is the HTML report in your temp directory.
+- No code changed during the run. The only new file is the HTML report in your temp directory, served at the returned localhost URL.
+- Every Mermaid block parses successfully with the same pinned Mermaid version loaded by the report.
 - It stops after the report and asks which candidate you want, rather than continuing on its own.
 - Each card cites real caller/test evidence, checks spec or ADR intent, and explains the payoff as locality or leverage — not just "this is cleaner."
 - Intent checks explain the implication: "because the spec requires X, the candidate must preserve Y and may change Z."

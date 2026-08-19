@@ -50,7 +50,13 @@ Do not turn vocabulary matching into proof. Seeing "Sealer", "manifest", "adapte
 
 ### 2. Present candidates as an HTML report
 
-Write a self-contained HTML file to the OS temp directory so nothing lands in the repo. Resolve the temp dir from `$TMPDIR`, falling back to `/tmp` (or `%TEMP%` on Windows), and write to `<tmpdir>/architecture-review-<timestamp>.html` so each run gets a fresh file. Open it for the user — `xdg-open <path>` on Linux, `open <path>` on macOS, `start <path>` on Windows — and tell them the absolute path.
+Write a self-contained HTML file to the OS temp directory so nothing lands in the repo. Resolve the temp dir from `$TMPDIR`, falling back to `/tmp` (or `%TEMP%` on Windows), and write to `<tmpdir>/architecture-review-<timestamp>.html` so each run gets a fresh file.
+
+Before serving the report, call the Skill tool with "validate-mermaid" and validate the absolute report path with Mermaid 11.16.1. The compatibility command `python3 scripts/validate-report.py <absolute-report-path>` delegates to that skill's validator when a direct Skill tool call is unavailable. If `validate-mermaid` is not installed, stop and tell the user instead of skipping validation. Fix every reported diagram and rerun validation until it succeeds. Do not serve a report with unvalidated Mermaid syntax. Pin the report's Mermaid CDN import to the same exact `11.16.1` version; do not use a floating `@11` URL.
+
+Make the report reachable from the user's browser. Run `python3 scripts/serve-report.py <absolute-report-path>` from this skill's directory as a long-running process. The script chooses a free port and prints a tokenized `REPORT_URL=http://localhost:<port>/<token>/`; give that URL to the user, followed by the absolute file path as a fallback. Keep the server running while the user reviews the report. If the harness cannot run the bundled script, use an equivalent single-file local server that does not expose the rest of the temp directory.
+
+Opening the file directly is optional. Use `xdg-open`, `open`, or `start` only when a desktop session is available, and never treat a successful opener exit code as proof that the user can see the report. Do not finish with only a temp-file path.
 
 The report uses **Tailwind via CDN** for layout and styling, and **Mermaid via CDN** for diagrams where a graph/flow/sequence reliably communicates the structure. Mix Mermaid with hand-crafted CSS/SVG visuals — use Mermaid when relationships are graph-shaped (call graphs, dependencies, sequences), and hand-built divs/SVG when you want something more editorial (mass diagrams, cross-sections, collapse animations). Each candidate gets a **before/after visualisation**. Be visual.
 

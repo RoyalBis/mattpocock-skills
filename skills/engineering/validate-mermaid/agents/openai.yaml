@@ -1,0 +1,4 @@
+interface:
+  display_name: "Validate Mermaid"
+  short_description: "Validate Mermaid diagrams recursively"
+  default_prompt: "Use $validate-mermaid to validate Mermaid diagrams in this workspace."
