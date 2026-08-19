@@ -1,6 +1,6 @@
 ---
 name: grill-me
-description: A relentless interview to sharpen a plan or design.
+description: Stress-test a plan or design through focused, decision-oriented questions.
 ---
 
 Call the Skill tool with "grilling".

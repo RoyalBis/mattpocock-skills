@@ -5,7 +5,7 @@ description: Writing, explore — mine raw fragments, no structure yet.
 
 <what-to-do>
 
-This is pure **explore**: widen the space of what could be written without committing to structure — committing is _exploit_, a separate skill's job. Run a grilling session that produces fragments, interviewing the user relentlessly about whatever they want to write about. Imposing phases, outlines, or article structure is out of scope here.
+This is pure **explore**: widen the space of what could be written without committing to structure — committing is _exploit_, a separate skill's job. Run a grilling session that produces fragments, using focused questions to help the user uncover what they want to write about. Imposing phases, outlines, or article structure is out of scope here.
 
 As fragments emerge from either side of the conversation, append them to a single markdown file.
 

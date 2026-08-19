@@ -110,7 +110,7 @@ Do not make the interface sketch implementation-ready or settle low-level types 
 
 ### 3. Grilling loop
 
-Once the user picks a candidate, call the Skill tool with "grilling" to walk the decision tree with them — constraints, dependencies, the shape of the deepened module, what sits behind the seam, what tests survive.
+Once the user picks a candidate, call the Skill tool with "grilling" to work through the unresolved choices with them: constraints, dependencies, the shape of the proposed module, what it owns, and which tests survive.
 
 Side effects happen inline as decisions crystallize — call the Skill tool with "domain-modeling" to keep the domain model current as you go:
 

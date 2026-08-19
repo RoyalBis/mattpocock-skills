@@ -1,6 +1,6 @@
 ## What it does
 
-`grill-me` takes a **loose idea** and interviews you until you can commit to it. You do not need a worked-out plan to start — producing one is what the [session](https://www.aihero.dev/ai-coding-dictionary/session) is for. It asks in **rounds**: each round is the whole **frontier** — every question whose prerequisites you have already settled — so you are never asked something that hinges on an answer it hasn't heard yet.
+`grill-me` takes a **loose idea** and questions it until you can commit to a defensible direction. You do not need a worked-out plan to start — producing one is what the [session](https://www.aihero.dev/ai-coding-dictionary/session) is for. It works in focused rounds of numbered `Q1`, `Q2`, `Q3` questions, starting with choices that can be made now and using each answer to decide what matters next.
 
 It is **[stateless](https://www.aihero.dev/ai-coding-dictionary/stateless)**. It writes no files and leaves no workspace behind. The only thing it leaves is a sharper version of the idea, in your own head.
 
@@ -39,14 +39,15 @@ Talking your way through an ungrillable question is where sessions balloon. The 
 ## It's working if
 
 - You disagree with something. A session with no pushback from you is a session you didn't need.
-- Questions arrive in a few rounds rather than one long drip, and later rounds clearly build on what you said earlier.
+- Questions arrive as a numbered sequence across focused rounds, and later rounds clearly build on what you said earlier.
+- Recommendations explain their reasoning instead of appearing as bare labels or options.
 - You end up somewhere you didn't expect, because a question surfaced a decision you had been making implicitly.
 - At the end you could defend each choice to someone who wasn't there.
 
 ## Common questions
 
 **How many questions should I expect, and how do I know when it ends?**
-Count rounds, not questions. Forty-six questions across four rounds is an ordinary session. It ends when the frontier is empty — every branch visited, nothing left silently assumed.
+There is no target count. A narrow decision may need three questions; a broad plan may need several rounds. It ends when further questions would not materially change the direction, risks, ownership, rollout, or implementation, and you confirm the final summary.
 
 **It asked me two hundred questions. What went wrong?**
 Usually the scope was too large. Ask the agent to break the work into smaller pieces first, then grill each one. Very long sessions also drift into the **[dumb zone](https://www.aihero.dev/ai-coding-dictionary/smart-zone)**, where the [context window](https://www.aihero.dev/ai-coding-dictionary/context-window) is full enough that the questions get worse.
