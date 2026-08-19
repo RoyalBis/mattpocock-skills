@@ -1,0 +1,6 @@
+interface:
+  display_name: "Slidev"
+  short_description: "Build interactive, verified Slidev presentations"
+  default_prompt: "Use $slidev to work on the Slidev presentation I identify, including requested animations and interactions."
+policy:
+  allow_implicit_invocation: false
